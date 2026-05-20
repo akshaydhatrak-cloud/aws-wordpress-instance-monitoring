@@ -1,6 +1,6 @@
 # Set Up and Monitor a WordPress Instance on AWS
 
-This repository documents and automates the course-end project from the supplied PDF: configure a WordPress instance with AWS CloudFormation, create an AMI, launch a development WordPress instance with Auto Scaling, shut down the development instance outside business hours, and monitor availability with Route 53.
+AWS infrastructure project for provisioning a WordPress instance, creating a reusable AMI, launching a development environment with Auto Scaling, and monitoring availability with Route 53.
 
 ## Features
 
@@ -26,17 +26,15 @@ This repository documents and automates the course-end project from the supplied
 aws-wordpress-instance-monitoring/
 |-- assets/
 |   |-- architecture.svg
-|   |-- pdf-page-8-image-1.jpg
-|   |-- pdf-page-8-image-2.png
-|   |-- pdf-page-8-image-3.png
-|   |-- pdf-page-8-image-4.png
-|   |-- pdf-page-8-image-5.png
-|   `-- pdf-page-8-image-6.png
+|   |-- aws-console-01.jpg
+|   |-- aws-console-02.png
+|   |-- aws-console-03.png
+|   |-- aws-console-04.png
+|   |-- aws-console-05.png
+|   `-- aws-console-06.png
 |-- cloudformation/
 |   |-- dev-wordpress-asg.yml
 |   `-- wordpress-stack.yml
-|-- docs/
-|   `-- inferred-components.md
 |-- scripts/
 |   |-- create-wordpress-ami.ps1
 |   |-- deploy-dev-asg.ps1
@@ -100,20 +98,12 @@ Architecture visual:
 
 ![AWS WordPress setup and monitoring architecture](assets/architecture.svg)
 
-Screenshots extracted from the supplied PDF are stored in `assets/`. They are included as source evidence, but the PDF primarily contained project instructions rather than full console walkthrough screenshots.
+AWS console reference:
 
-![PDF source screenshot](assets/pdf-page-8-image-1.jpg)
-
-## Deliverables Mapped to the Prompt
-
-- Create a CloudFormation stack: `cloudformation/wordpress-stack.yml`
-- Create an AMI of the WordPress instance: `scripts/create-wordpress-ami.ps1`
-- Configure Auto Scaling to launch a new WordPress instance: `cloudformation/dev-wordpress-asg.yml`
-- Configure automatic shutdown: Auto Scaling scheduled actions in `dev-wordpress-asg.yml`
-- Monitor availability: Route 53 health check in `wordpress-stack.yml`
+![AWS console screenshot](assets/aws-console-01.jpg)
 
 ## Security Notes
 
 - SSH access is restricted by `AdminCidr`.
 - The instance role uses `AmazonSSMManagedInstanceCore` for managed access support.
-- The WordPress database password is supplied through a `NoEcho` CloudFormation parameter.
+- The WordPress database password is passed through a `NoEcho` CloudFormation parameter.
