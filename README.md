@@ -1,10 +1,10 @@
-# AWS CloudFormation WordPress Deployment
+# Set Up and Monitor a WordPress Instance on AWS
 
-AWS infrastructure project for deploying WordPress with CloudFormation. The project provisions a production WordPress instance, creates a reusable AMI, and launches a scheduled development environment to control resource usage.
+AWS infrastructure project for deploying a WordPress instance with CloudFormation, creating an AMI from the instance, and launching a scheduled development instance from that AMI.
 
 ## Features
 
-- CloudFormation template for a production WordPress EC2 instance
+- CloudFormation template for a WordPress EC2 instance
 - Apache, PHP, MariaDB, and WordPress bootstrap through EC2 user data
 - AMI creation script for the configured WordPress instance
 - Development Auto Scaling group launched from the WordPress AMI
@@ -25,8 +25,6 @@ AWS infrastructure project for deploying WordPress with CloudFormation. The proj
 
 ```text
 aws-wordpress-instance-monitoring/
-|-- assets/
-|   `-- architecture.svg
 |-- cloudformation/
 |   |-- dev-wordpress-asg.yml
 |   `-- wordpress-stack.yml
@@ -46,12 +44,12 @@ Prerequisites:
 - Existing VPC, subnet, and EC2 key pair
 - PowerShell
 
-Deploy the production WordPress stack:
+Deploy the WordPress stack:
 
 ```powershell
 cd scripts
 .\deploy-live-stack.ps1 `
-  -StackName wordpress-prod `
+  -StackName wordpress-live `
   -VpcId vpc-xxxxxxxx `
   -SubnetId subnet-xxxxxxxx `
   -KeyName your-key-pair `
@@ -81,17 +79,16 @@ Deploy the development Auto Scaling group:
   -Region us-east-1
 ```
 
-## Architecture
+## Resources
 
-The production stack installs WordPress on an EC2 instance using CloudFormation user data. A Route 53 health check monitors the HTTP endpoint.
+The CloudFormation templates create:
 
-After WordPress is configured, the AMI script captures the instance as a reusable base image. The development stack uses that AMI in a launch template and Auto Scaling group. Scheduled scaling actions keep development capacity active during working hours and scale it down after hours.
-
-## Screenshots
-
-Architecture:
-
-![AWS WordPress CloudFormation architecture](assets/architecture.svg)
+- EC2 instance for WordPress
+- Security group for HTTP and SSH access
+- IAM role and instance profile
+- Route 53 health check
+- Launch template for the development instance
+- Auto Scaling group with scheduled actions
 
 ## Security Notes
 
