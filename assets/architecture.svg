@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">AWS WordPress instance setup and monitoring architecture</title>
+  <desc id="desc">A live WordPress EC2 instance is created with CloudFormation, converted into an AMI, used by a development Auto Scaling group, and monitored with Route 53 health checks.</desc>
+  <rect width="1120" height="620" fill="#f7f8fa"/>
+  <text x="56" y="64" fill="#172033" font-family="Segoe UI, Arial, sans-serif" font-size="32" font-weight="700">AWS WordPress Setup and Monitoring</text>
+  <text x="56" y="98" fill="#536173" font-family="Segoe UI, Arial, sans-serif" font-size="18">CloudFormation deployment, AMI promotion, scheduled development scaling, and health monitoring</text>
+
+  <rect x="70" y="158" width="280" height="190" rx="8" fill="#ffffff" stroke="#c4ccd8" stroke-width="2"/>
+  <text x="104" y="204" fill="#ff9900" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Live Stack</text>
+  <text x="104" y="238" fill="#172033" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="700">EC2 WordPress</text>
+  <text x="104" y="268" fill="#536173" font-family="Segoe UI, Arial, sans-serif" font-size="15">Apache, PHP, MariaDB</text>
+  <text x="104" y="296" fill="#536173" font-family="Segoe UI, Arial, sans-serif" font-size="15">Provisioned by CloudFormation</text>
+
+  <rect x="420" y="158" width="280" height="190" rx="8" fill="#ffffff" stroke="#c4ccd8" stroke-width="2"/>
+  <text x="454" y="204" fill="#ff9900" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">AMI</text>
+  <text x="454" y="238" fill="#172033" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="700">WordPress Base Image</text>
+  <text x="454" y="268" fill="#536173" font-family="Segoe UI, Arial, sans-serif" font-size="15">Created from configured live EC2</text>
+  <text x="454" y="296" fill="#536173" font-family="Segoe UI, Arial, sans-serif" font-size="15">Used for repeatable dev launch</text>
+
+  <rect x="770" y="158" width="280" height="190" rx="8" fill="#ffffff" stroke="#c4ccd8" stroke-width="2"/>
+  <text x="804" y="204" fill="#ff9900" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Development</text>
+  <text x="804" y="238" fill="#172033" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="700">Auto Scaling Group</text>
+  <text x="804" y="268" fill="#536173" font-family="Segoe UI, Arial, sans-serif" font-size="15">Desired capacity 1 in business hours</text>
+  <text x="804" y="296" fill="#536173" font-family="Segoe UI, Arial, sans-serif" font-size="15">Desired capacity 0 after hours</text>
+
+  <path d="M350 253 H420" fill="none" stroke="#536173" stroke-width="3"/>
+  <path d="M700 253 H770" fill="none" stroke="#536173" stroke-width="3"/>
+  <path d="M407 244 L420 253 L407 262" fill="none" stroke="#536173" stroke-width="3"/>
+  <path d="M757 244 L770 253 L757 262" fill="none" stroke="#536173" stroke-width="3"/>
+
+  <rect x="166" y="430" width="320" height="88" rx="8" fill="#eef6ff" stroke="#93c5fd"/>
+  <text x="198" y="466" fill="#172033" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">Route 53 Health Check</text>
+  <text x="198" y="494" fill="#536173" font-family="Segoe UI, Arial, sans-serif" font-size="15">HTTP availability monitoring for live WordPress</text>
+
+  <rect x="634" y="430" width="320" height="88" rx="8" fill="#ecfdf5" stroke="#86efac"/>
+  <text x="666" y="466" fill="#172033" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">Scheduled Actions</text>
+  <text x="666" y="494" fill="#536173" font-family="Segoe UI, Arial, sans-serif" font-size="15">Start and stop development capacity automatically</text>
+
+  <path d="M250 348 V430" fill="none" stroke="#3b82f6" stroke-width="2" stroke-dasharray="7 7"/>
+  <path d="M910 348 V430" fill="none" stroke="#22c55e" stroke-width="2" stroke-dasharray="7 7"/>
+</svg>

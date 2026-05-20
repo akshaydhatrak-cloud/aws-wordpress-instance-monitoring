@@ -1,0 +1,141 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Single-instance WordPress stack for course-end AWS architecture project.
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: wordpress-portfolio
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+  InstanceType:
+    Type: String
+    Default: t3.micro
+    AllowedValues:
+      - t3.micro
+      - t3.small
+      - t3.medium
+  AllowedHttpCidr:
+    Type: String
+    Default: 0.0.0.0/0
+  AdminCidr:
+    Type: String
+    Description: CIDR allowed to SSH to the instance.
+  WordPressDbPassword:
+    Type: String
+    NoEcho: true
+    MinLength: 12
+    Description: Local WordPress database user password.
+
+Resources:
+  WordPressSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP and controlled SSH access to WordPress.
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: !Ref AllowedHttpCidr
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref AdminCidr
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-wordpress-sg
+
+  WordPressInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-instance-role
+
+  WordPressInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref WordPressInstanceRole
+
+  WordPressInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyName
+      IamInstanceProfile: !Ref WordPressInstanceProfile
+      SubnetId: !Ref SubnetId
+      SecurityGroupIds:
+        - !Ref WordPressSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-wordpress-live
+        - Key: Project
+          Value: !Ref ProjectName
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          dnf update -y
+          dnf install -y httpd mariadb105-server php php-mysqli php-json php-mbstring wget tar
+          systemctl enable --now httpd mariadb
+
+          mysql -e "CREATE DATABASE IF NOT EXISTS wordpress;"
+          mysql -e "CREATE USER IF NOT EXISTS 'wordpress'@'localhost' IDENTIFIED BY '${WordPressDbPassword}';"
+          mysql -e "GRANT ALL PRIVILEGES ON wordpress.* TO 'wordpress'@'localhost';"
+          mysql -e "FLUSH PRIVILEGES;"
+
+          cd /tmp
+          wget https://wordpress.org/latest.tar.gz
+          tar -xzf latest.tar.gz
+          cp -r wordpress/* /var/www/html/
+          cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
+          sed -i "s/database_name_here/wordpress/" /var/www/html/wp-config.php
+          sed -i "s/username_here/wordpress/" /var/www/html/wp-config.php
+          sed -i "s/password_here/${WordPressDbPassword}/" /var/www/html/wp-config.php
+          chown -R apache:apache /var/www/html
+          systemctl restart httpd
+
+  WordPressHealthCheck:
+    Type: AWS::Route53::HealthCheck
+    Properties:
+      HealthCheckConfig:
+        Type: HTTP
+        FullyQualifiedDomainName: !GetAtt WordPressInstance.PublicDnsName
+        Port: 80
+        ResourcePath: /
+        RequestInterval: 30
+        FailureThreshold: 3
+      HealthCheckTags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-wordpress-http
+
+Outputs:
+  InstanceId:
+    Description: Live WordPress EC2 instance ID.
+    Value: !Ref WordPressInstance
+  PublicDnsName:
+    Description: Public DNS name for WordPress setup.
+    Value: !GetAtt WordPressInstance.PublicDnsName
+  WebsiteUrl:
+    Description: WordPress HTTP endpoint.
+    Value: !Sub http://${WordPressInstance.PublicDnsName}/
+  HealthCheckId:
+    Description: Route 53 health check ID.
+    Value: !Ref WordPressHealthCheck

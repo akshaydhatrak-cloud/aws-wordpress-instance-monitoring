@@ -1,0 +1,101 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Development WordPress Auto Scaling group from an approved WordPress AMI.
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: wordpress-portfolio
+  WordPressAmiId:
+    Type: AWS::EC2::Image::Id
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+  InstanceType:
+    Type: String
+    Default: t3.micro
+  AllowedHttpCidr:
+    Type: String
+    Default: 0.0.0.0/0
+  BusinessHoursStartUtc:
+    Type: String
+    Default: "0 9 * * MON-FRI"
+  BusinessHoursStopUtc:
+    Type: String
+    Default: "0 18 * * MON-FRI"
+
+Resources:
+  DevSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP access to development WordPress instances.
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: !Ref AllowedHttpCidr
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-dev-sg
+
+  DevLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: !Sub ${ProjectName}-dev-wordpress
+      LaunchTemplateData:
+        ImageId: !Ref WordPressAmiId
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref KeyName
+        SecurityGroupIds:
+          - !Ref DevSecurityGroup
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: Name
+                Value: !Sub ${ProjectName}-wordpress-dev
+              - Key: Project
+                Value: !Ref ProjectName
+
+  DevAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      MinSize: "0"
+      MaxSize: "1"
+      DesiredCapacity: "1"
+      VPCZoneIdentifier: !Ref SubnetIds
+      LaunchTemplate:
+        LaunchTemplateId: !Ref DevLaunchTemplate
+        Version: !GetAtt DevLaunchTemplate.LatestVersionNumber
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-wordpress-dev-asg
+          PropagateAtLaunch: false
+
+  StartDevelopmentInstance:
+    Type: AWS::AutoScaling::ScheduledAction
+    Properties:
+      AutoScalingGroupName: !Ref DevAutoScalingGroup
+      Recurrence: !Ref BusinessHoursStartUtc
+      MinSize: 1
+      MaxSize: 1
+      DesiredCapacity: 1
+
+  StopDevelopmentInstance:
+    Type: AWS::AutoScaling::ScheduledAction
+    Properties:
+      AutoScalingGroupName: !Ref DevAutoScalingGroup
+      Recurrence: !Ref BusinessHoursStopUtc
+      MinSize: 0
+      MaxSize: 1
+      DesiredCapacity: 0
+
+Outputs:
+  AutoScalingGroupName:
+    Description: Development WordPress Auto Scaling group.
+    Value: !Ref DevAutoScalingGroup
+  LaunchTemplateId:
+    Description: Launch template using the WordPress AMI.
+    Value: !Ref DevLaunchTemplate
