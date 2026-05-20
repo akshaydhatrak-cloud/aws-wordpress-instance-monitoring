@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Single-instance WordPress stack for course-end AWS architecture project.
+Description: Single-instance WordPress stack with HTTP health monitoring.
 
 Parameters:
   ProjectName:
