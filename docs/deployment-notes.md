@@ -1,6 +1,6 @@
 # Deployment Notes
 
-The live stack deploys WordPress on a single EC2 instance using CloudFormation user data.
+The live stack deployed WordPress on a single EC2 instance using CloudFormation user data.
 
 Main checks after deployment:
 

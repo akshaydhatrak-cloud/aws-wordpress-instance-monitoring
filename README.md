@@ -1,27 +1,27 @@
-# AWS CloudFormation WordPress Deployment
+# Internship Experience: AWS CloudFormation WordPress Deployment
 
 ## Overview
 
-This project deploys a WordPress instance on AWS using CloudFormation. The live stack provisions an EC2 instance, installs Apache, PHP, MariaDB, and WordPress through user data, then creates a Route 53 health check for the HTTP endpoint.
+During my internship work, I deployed a WordPress instance on AWS using CloudFormation. The live stack provisioned an EC2 instance, installed Apache, PHP, MariaDB, and WordPress through user data, then created a Route 53 health check for the HTTP endpoint.
 
-A second stack uses a WordPress AMI to run a small development Auto Scaling group on a schedule.
+A second stack used a WordPress AMI to run a small development Auto Scaling group on a schedule.
 
 ## Architecture
 
-The live deployment path is:
+The live deployment path I implemented was:
 
 ```text
 CloudFormation -> Security Group + IAM Role -> EC2 WordPress instance
 Route 53 Health Check -> WordPress HTTP endpoint
 ```
 
-The development path is:
+The development path was:
 
 ```text
 Configured WordPress EC2 -> AMI -> Launch Template -> Auto Scaling Group
 ```
 
-Architecture files are in `architecture/`:
+Architecture notes are in `architecture/`:
 
 - `architecture.mmd`
 - `architecture.svg`
@@ -36,14 +36,14 @@ Architecture files are in `architecture/`:
 - Auto Scaling
 - Route 53 Health Checks
 
-## Deployment Steps
+## Implementation Steps
 
-1. Deploy `cloudformation/wordpress-stack.yml` with an existing VPC, subnet, key pair, and admin CIDR.
-2. Wait for the EC2 user data process to finish installing WordPress.
-3. Open the stack output URL and complete the WordPress setup page.
-4. Create an AMI from the configured WordPress instance.
-5. Deploy `cloudformation/dev-wordpress-asg.yml` using the AMI ID.
-6. Confirm the scheduled scaling settings match the intended development window.
+1. Deployed `cloudformation/wordpress-stack.yml` with an existing VPC, subnet, key pair, and admin CIDR.
+2. Waited for the EC2 user data process to finish installing WordPress.
+3. Opened the stack output URL and completed the WordPress setup page.
+4. Created an AMI from the configured WordPress instance.
+5. Deployed `cloudformation/dev-wordpress-asg.yml` using the AMI ID.
+6. Confirmed the scheduled scaling settings matched the intended development window.
 
 Deploy live WordPress:
 
@@ -80,7 +80,7 @@ Deploy the development stack:
   -Region us-east-1
 ```
 
-## Troubleshooting
+## Troubleshooting Notes
 
 - If the WordPress page does not load, check the EC2 system log and confirm user data completed.
 - If SSH fails, verify `AdminCidr` and the key pair name.
@@ -93,7 +93,7 @@ Route 53 health check created for the WordPress endpoint:
 
 ![Route 53 health check created](screenshots/route53-health-check-created.png)
 
-## What I Learned
+## Key Takeaways
 
 - CloudFormation makes a WordPress EC2 deployment repeatable.
 - User data is useful for bootstrap tasks, but logs must be checked when package installs fail.
