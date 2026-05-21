@@ -87,6 +87,12 @@ Deploy the development stack:
 - If CloudFormation fails on the database password, confirm it meets the minimum length.
 - If the development stack has no running instance, check the Auto Scaling desired capacity and scheduled action time.
 
+## Screenshots
+
+Storage selection reference:
+
+![WordPress storage selection reference](screenshots/wordpress-storage-question.png)
+
 ## What I Learned
 
 - CloudFormation makes a WordPress EC2 deployment repeatable.
