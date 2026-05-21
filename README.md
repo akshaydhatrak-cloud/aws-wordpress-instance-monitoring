@@ -1,66 +1,97 @@
-# AWS CloudFormation WordPress Deployment
+# Set Up and Monitor a WordPress Instance on AWS
 
-## Business Objective
+AWS infrastructure project for deploying a WordPress instance with CloudFormation, creating an AMI from the instance, and launching a scheduled development instance from that AMI.
 
-This project provisions a WordPress environment on AWS using CloudFormation. It is designed as a production-like single-instance WordPress deployment with a repeatable path for creating a development environment from an approved AMI.
+## Features
 
-## Cloud Architecture Overview
+- CloudFormation template for a WordPress EC2 instance
+- Apache, PHP, MariaDB, and WordPress bootstrap through EC2 user data
+- AMI creation script for the configured WordPress instance
+- Development Auto Scaling group launched from the WordPress AMI
+- Scheduled development capacity from 9 AM to 6 PM
+- Route 53 HTTP health check for WordPress availability monitoring
 
-The live stack deploys an EC2 instance into an existing VPC subnet. CloudFormation installs Apache, PHP, MariaDB, and WordPress through EC2 user data. A security group allows HTTP access and restricts SSH to an approved admin CIDR. IAM attaches an instance role for managed instance access.
-
-After the live instance is configured, a script can create a WordPress AMI. A second CloudFormation stack uses that AMI with a launch template and Auto Scaling group for a scheduled development instance.
-
-The draw.io source is available at `docs/architecture.drawio`.
-
-## Services Used
+## Tech Stack
 
 - AWS CloudFormation
 - Amazon EC2
-- Amazon VPC
-- AWS IAM
 - Amazon Machine Images
 - Auto Scaling
 - Route 53 Health Checks
+- AWS IAM
+- PowerShell
 
-## Deployment Workflow
+## Project Structure
 
-1. Deploy the live WordPress stack from `infrastructure/cloudformation/wordpress-stack.yml`.
-2. Provide an existing VPC, subnet, EC2 key pair, admin CIDR, and database password.
-3. Allow the EC2 user data process to install and configure WordPress.
-4. Validate the WordPress endpoint from the stack output.
-5. Create an AMI from the configured WordPress instance.
-6. Deploy the development Auto Scaling stack from `infrastructure/cloudformation/dev-wordpress-asg.yml`.
-7. Use scheduled scaling to run the development instance during defined business hours.
+```text
+aws-wordpress-instance-monitoring/
+|-- cloudformation/
+|   |-- dev-wordpress-asg.yml
+|   `-- wordpress-stack.yml
+|-- scripts/
+|   |-- create-wordpress-ami.ps1
+|   |-- deploy-dev-asg.ps1
+|   `-- deploy-live-stack.ps1
+`-- README.md
+```
 
-Example live deployment:
+## Setup
+
+Prerequisites:
+
+- AWS account with permissions for EC2, IAM, CloudFormation, Auto Scaling, and Route 53 health checks
+- AWS CLI configured locally
+- Existing VPC, subnet, and EC2 key pair
+- PowerShell
+
+Deploy the WordPress stack:
 
 ```powershell
-cd infrastructure/scripts
+cd scripts
 .\deploy-live-stack.ps1 `
   -StackName wordpress-live `
   -VpcId vpc-xxxxxxxx `
   -SubnetId subnet-xxxxxxxx `
-  -KeyName wordpress-key `
+  -KeyName your-key-pair `
   -AdminCidr 203.0.113.10/32 `
   -WordPressDbPassword "replace-with-a-strong-password" `
   -Region us-east-1
 ```
 
-## Security Considerations
+Create an AMI from the configured WordPress instance:
 
-- SSH access is restricted through the `AdminCidr` parameter.
-- The database password is passed as a CloudFormation `NoEcho` parameter.
-- The EC2 instance uses an IAM instance profile instead of embedded AWS credentials.
-- HTTP is open based on the configured allowed CIDR.
-- Development infrastructure is separated into its own stack.
+```powershell
+.\create-wordpress-ami.ps1 `
+  -InstanceId i-xxxxxxxxxxxxxxxxx `
+  -AmiName wordpress-dev-base `
+  -Region us-east-1
+```
 
-## Performance and Scalability Improvements
+Deploy the development Auto Scaling group:
 
-The live deployment is intentionally simple and uses a single EC2 instance. The AMI and Auto Scaling workflow improves repeatability for development environments and allows scheduled capacity, reducing unnecessary runtime.
+```powershell
+.\deploy-dev-asg.ps1 `
+  -StackName wordpress-dev `
+  -WordPressAmiId ami-xxxxxxxxxxxxxxxxx `
+  -VpcId vpc-xxxxxxxx `
+  -SubnetIds "subnet-xxxxxxxx,subnet-yyyyyyyy" `
+  -KeyName your-key-pair `
+  -Region us-east-1
+```
 
-## Operational Insights
+## Resources
 
-- Route 53 health checks monitor the live WordPress HTTP endpoint.
-- CloudFormation outputs expose the instance ID, public DNS, website URL, and health check ID.
-- The AMI creation script captures a configured WordPress baseline for later use.
-- Scheduled scaling keeps the development environment aligned with working hours.
+The CloudFormation templates create:
+
+- EC2 instance for WordPress
+- Security group for HTTP and SSH access
+- IAM role and instance profile
+- Route 53 health check
+- Launch template for the development instance
+- Auto Scaling group with scheduled actions
+
+## Security Notes
+
+- SSH access is restricted by `AdminCidr`.
+- The instance role uses `AmazonSSMManagedInstanceCore` for managed access support.
+- The WordPress database password is passed through a `NoEcho` CloudFormation parameter.
