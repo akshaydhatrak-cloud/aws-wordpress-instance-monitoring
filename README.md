@@ -89,9 +89,9 @@ Deploy the development stack:
 
 ## Screenshots
 
-Storage selection reference:
+Route 53 health check created for the WordPress endpoint:
 
-![WordPress storage selection reference](screenshots/wordpress-storage-question.png)
+![Route 53 health check created](screenshots/route53-health-check-created.png)
 
 ## What I Learned
 
