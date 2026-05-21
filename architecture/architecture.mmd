@@ -1,0 +1,11 @@
+flowchart LR
+  cfn[CloudFormation stack] --> sg[Security group]
+  cfn --> role[IAM instance role]
+  cfn --> ec2[EC2 WordPress instance]
+  sg -. HTTP and restricted SSH .-> ec2
+  role -. SSM managed access .-> ec2
+  ec2 --> wp[Apache + PHP + MariaDB + WordPress]
+  ec2 --> ami[WordPress AMI]
+  ami --> lt[Launch template]
+  lt --> asg[Development Auto Scaling group]
+  health[Route 53 health check] -. HTTP check .-> ec2
