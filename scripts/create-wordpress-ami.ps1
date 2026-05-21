@@ -4,6 +4,12 @@ param(
   [string]$Region = "us-east-1"
 )
 
+$ErrorActionPreference = "Stop"
+
+if (-not (Get-Command aws -ErrorAction SilentlyContinue)) {
+  throw "AWS CLI is required but was not found in PATH."
+}
+
 $timestamp = Get-Date -Format "yyyyMMddHHmmss"
 
 aws ec2 create-image `

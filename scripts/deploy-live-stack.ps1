@@ -8,10 +8,18 @@ param(
   [string]$Region = "us-east-1"
 )
 
+$ErrorActionPreference = "Stop"
+
+if (-not (Get-Command aws -ErrorAction SilentlyContinue)) {
+  throw "AWS CLI is required but was not found in PATH."
+}
+
+$templatePath = Join-Path $PSScriptRoot "../cloudformation/wordpress-stack.yml"
+
 aws cloudformation deploy `
   --region $Region `
   --stack-name $StackName `
-  --template-file "../cloudformation/wordpress-stack.yml" `
+  --template-file $templatePath `
   --capabilities CAPABILITY_NAMED_IAM `
   --parameter-overrides `
     VpcId=$VpcId `
